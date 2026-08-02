@@ -1,0 +1,79 @@
+schema_version: "1.0"
+
+project:
+  name: DualArrow Quickstart
+  domain: manufacturing
+  risk_level: medium
+
+knowledge_store:
+  root: ./knowledge
+  mode: local_sidecar
+  sidecar_path: ./knowledge/.dualarrow/dualarrow.db
+  include:
+    - "**/*.md"
+  exclude:
+    - "**/.dualarrow/**"
+
+embedding:
+  # The deterministic hash provider is zero-network and ideal for the quickstart.
+  # Use sentence_transformer or openai_compatible for accuracy-sensitive production use.
+  provider: hash
+  model: dualarrow-hash-v1
+  dimensions: 384
+
+generation:
+  # Extractive mode only emits sentences found in retrieved evidence.
+  provider: extractive
+
+retrieval_profiles:
+  fast:
+    retrievers:
+      - {type: exact, top_k: 20, weight: 1.4}
+      - {type: bm25, top_k: 40, weight: 1.0}
+      - {type: dense, top_k: 40, weight: 1.0}
+    fusion: weighted_rrf
+    candidate_limit: 60
+    final_limit: 8
+    reranker: none
+
+  balanced:
+    retrievers:
+      - {type: exact, top_k: 30, weight: 1.5}
+      - {type: bm25, top_k: 60, weight: 1.1}
+      - {type: dense, top_k: 60, weight: 1.0}
+      - {type: graph, top_k: 20, weight: 0.6}
+    fusion: weighted_rrf
+    candidate_limit: 100
+    final_limit: 12
+    reranker: heuristic
+
+  verified_high_risk:
+    retrievers:
+      - {type: exact, top_k: 50, weight: 1.7}
+      - {type: bm25, top_k: 100, weight: 1.2}
+      - {type: dense, top_k: 100, weight: 1.0}
+      - {type: graph, top_k: 50, weight: 0.8}
+    fusion: weighted_rrf
+    candidate_limit: 180
+    final_limit: 20
+    reranker: heuristic
+
+default_profile: balanced
+
+verification:
+  enabled: true
+  minimum_claim_coverage: 0.75
+  minimum_confidence: 0.60
+  maximum_conflict_score: 0.25
+  minimum_support_score: 0.42
+  require_citations: true
+  require_multiple_sources: false
+  validate_numbers: true
+
+security:
+  scan_prompt_injection: true
+
+api:
+  host: 0.0.0.0
+  port: 8080
+  workers: 1

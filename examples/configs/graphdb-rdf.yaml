@@ -1,0 +1,33 @@
+schema_version: "1.0"
+project:
+  name: DualArrow RDF
+  domain: medical
+  risk_level: high
+knowledge_store:
+  root: ./knowledge
+  mode: replicated
+  sidecar_path: ./data/dualarrow-rdf.db
+stores:
+  rdf:
+    provider: graphdb
+    options:
+      query_endpoint: ${GRAPHDB_QUERY_ENDPOINT}
+      update_endpoint: ${GRAPHDB_UPDATE_ENDPOINT}
+      username: ${GRAPHDB_USERNAME:-}
+      password: ${GRAPHDB_PASSWORD:-}
+embedding:
+  provider: sentence_transformer
+  model: BAAI/bge-m3
+  dimensions: 1024
+generation:
+  provider: openai_compatible
+  model: ${GENERATION_MODEL}
+  base_url: ${GENERATION_BASE_URL}
+  api_key: ${GENERATION_API_KEY}
+default_profile: verified_high_risk
+verification:
+  minimum_claim_coverage: 0.95
+  minimum_confidence: 0.88
+  maximum_conflict_score: 0.15
+  minimum_support_score: 0.58
+  require_multiple_sources: true

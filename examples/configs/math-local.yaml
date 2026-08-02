@@ -1,0 +1,28 @@
+schema_version: "1.0"
+project:
+  name: DualArrow Mathematics
+  domain: mathematics
+  risk_level: high
+knowledge_store:
+  root: ../quickstart/knowledge
+  mode: local_sidecar
+  sidecar_path: ../../data/math-dualarrow.db
+ingestion:
+  views:
+    - {id: full_document, type: full_document}
+    - id: sections
+      type: markdown_heading
+      options: {maximum_tokens: 900}
+    - {id: equations, type: equation}
+    - {id: propositions, type: atomic_propositions}
+embedding:
+  provider: hash
+  dimensions: 384
+generation:
+  provider: extractive
+default_profile: verified_high_risk
+verification:
+  minimum_claim_coverage: 0.95
+  minimum_confidence: 0.80
+  minimum_support_score: 0.55
+  validate_numbers: true

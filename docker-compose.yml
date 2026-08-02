@@ -1,0 +1,83 @@
+services:
+  dualarrow:
+    build: .
+    environment:
+      DUALARROW_CONFIG: /app/dualarrow.yaml
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-DualArrowNeo4j2026!}
+      DUALARROW_API_KEY: ${DUALARROW_API_KEY:-}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./examples/configs/docker-multidb.yaml:/app/dualarrow.yaml:ro
+      - ./examples/quickstart/knowledge:/app/knowledge:ro
+      - dualarrow_data:/app/data
+    depends_on:
+      qdrant:
+        condition: service_started
+      opensearch:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    profiles: ["production"]
+
+  qdrant:
+    image: qdrant/qdrant:v1.18.2
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    profiles: ["production"]
+
+  opensearch:
+    image: opensearchproject/opensearch:3.7.0
+    environment:
+      discovery.type: single-node
+      plugins.security.disabled: "true"
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_PASSWORD:-DualArrow-Change-Me-2026!}
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    profiles: ["production"]
+
+  neo4j:
+    image: neo4j:2026.06.0-community
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-DualArrowNeo4j2026!}
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    profiles: ["production"]
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: dualarrow
+      POSTGRES_USER: dualarrow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-DualArrowPostgres2026!}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    profiles: ["postgres"]
+
+volumes:
+  dualarrow_data:
+  qdrant_data:
+  opensearch_data:
+  neo4j_data:
+  postgres_data:

@@ -1,0 +1,71 @@
+schema_version: "1.0"
+
+project:
+  name: DualArrow Production
+  domain: manufacturing
+  risk_level: high
+
+knowledge_store:
+  root: ./knowledge
+  mode: replicated
+  sidecar_path: ./data/dualarrow.db
+
+stores:
+  vector:
+    provider: qdrant
+    connection: ${QDRANT_URL:-http://qdrant:6333}
+    options:
+      collection: dualarrow_production
+      api_key: ${QDRANT_API_KEY:-}
+
+  lexical:
+    provider: opensearch
+    connection: ${OPENSEARCH_URL:-http://opensearch:9200}
+    options:
+      index: dualarrow-production
+      username: ${OPENSEARCH_USERNAME:-admin}
+      password: ${OPENSEARCH_PASSWORD}
+      verify_certs: false
+
+  graph:
+    provider: neo4j
+    connection: ${NEO4J_URI:-neo4j://neo4j:7687}
+    options:
+      username: ${NEO4J_USERNAME:-neo4j}
+      password: ${NEO4J_PASSWORD}
+      database: neo4j
+
+embedding:
+  provider: openai_compatible
+  model: ${EMBEDDING_MODEL}
+  dimensions: 1024
+  base_url: ${EMBEDDING_BASE_URL}
+  api_key: ${EMBEDDING_API_KEY}
+
+generation:
+  provider: openai_compatible
+  model: ${GENERATION_MODEL}
+  base_url: ${GENERATION_BASE_URL}
+  api_key: ${GENERATION_API_KEY}
+  temperature: 0
+
+# Omitted retrieval_profiles are filled with DualArrow defaults.
+default_profile: verified_high_risk
+
+verification:
+  minimum_claim_coverage: 0.95
+  minimum_confidence: 0.85
+  maximum_conflict_score: 0.20
+  minimum_support_score: 0.55
+  require_citations: true
+  require_multiple_sources: true
+  validate_numbers: true
+
+security:
+  api_key: ${DUALARROW_API_KEY}
+  scan_prompt_injection: true
+
+api:
+  host: 0.0.0.0
+  port: 8080
+  workers: 2

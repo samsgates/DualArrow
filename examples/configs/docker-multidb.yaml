@@ -1,0 +1,44 @@
+schema_version: "1.0"
+project:
+  name: DualArrow Docker Multi-DB
+  domain: manufacturing
+  risk_level: medium
+knowledge_store:
+  root: /app/knowledge
+  mode: replicated
+  sidecar_path: /app/data/dualarrow.db
+stores:
+  vector:
+    provider: qdrant
+    connection: http://qdrant:6333
+    options:
+      collection: dualarrow_docker
+  lexical:
+    provider: opensearch
+    connection: http://opensearch:9200
+    options:
+      index: dualarrow-docker
+      verify_certs: false
+  graph:
+    provider: neo4j
+    connection: neo4j://neo4j:7687
+    options:
+      username: neo4j
+      password: ${NEO4J_PASSWORD}
+      database: neo4j
+embedding:
+  provider: hash
+  dimensions: 384
+generation:
+  provider: extractive
+default_profile: balanced
+verification:
+  minimum_claim_coverage: 0.75
+  minimum_confidence: 0.60
+  minimum_support_score: 0.42
+security:
+  api_key: ${DUALARROW_API_KEY:-}
+api:
+  host: 0.0.0.0
+  port: 8080
+  workers: 1

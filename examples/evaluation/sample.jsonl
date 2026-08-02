@@ -1,0 +1,3 @@
+{"query":"Which bearing is approved for P-104?","expected_answer":"The approved primary drive bearing for Press Machine P-104 is BR-442."}
+{"query":"At what vibration level should P-104 be stopped after maintenance?","expected_answer":"Stop the machine if vibration exceeds 7.5 millimetres per second RMS."}
+{"query":"Does an association establish causation?","expected_answer":"An observed association does not by itself establish causation."}
