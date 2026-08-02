@@ -29,6 +29,14 @@ A verified answer retains this chain:
 answer -> claim -> evidence -> source span -> document version -> canonical source
 ```
 
+## How it works
+
+![How DualArrow works](media_resources/howits_works.png)
+
+## Architecture
+
+![DualArrow architecture diagram](media_resources/architech_diagram.png)
+
 ## Main features
 
 - Plain Markdown knowledge store through **ArrowMD**
