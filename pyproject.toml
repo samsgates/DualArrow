@@ -35,7 +35,7 @@ dependencies = [
 
 [project.optional-dependencies]
 local-ml = [
-  "sentence-transformers>=3.3,<6",
+  "sentence-transformers>=3.3,<7",
 ]
 postgres = [
   "SQLAlchemy[asyncio]>=2.0,<2.2",
